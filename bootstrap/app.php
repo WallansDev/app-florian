@@ -16,6 +16,19 @@ return Application::configure(basePath: dirname(__DIR__))
             'role'        => \App\Http\Middleware\RoleMiddleware::class,
             'ensure.role' => \App\Http\Middleware\EnsureRole::class,
         ]);
+
+        // Rediriger les utilisateurs non-authentifiés vers /login
+        $middleware->redirectGuestsTo('/login');
+
+        // Rediriger les utilisateurs déjà connectés selon leur rôle
+        $middleware->redirectUsersTo(function (\Illuminate\Http\Request $request) {
+            $user = $request->user();
+            return match ($user?->role) {
+                'supplier' => '/supplier/dashboard',
+                'seller'   => '/seller/dashboard',
+                default    => '/login',
+            };
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

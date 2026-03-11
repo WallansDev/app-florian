@@ -57,17 +57,17 @@ class SellerWebController extends Controller
             'name'       => 'required|string|max:255',
             'email'      => 'required|email|unique:users,email',
             'phone'      => 'nullable|string|max:50',
-            'password'   => 'required|string|min:8|confirmed',
             'unit_price' => 'required|numeric|min:0',
         ]);
 
         DB::transaction(function () use ($request) {
             $user = User::create([
-                'name'     => $request->name,
-                'email'    => $request->email,
-                'phone'    => $request->phone,
-                'role'     => 'client',
-                'password' => Hash::make($request->password),
+                'name'      => $request->name,
+                'email'     => $request->email,
+                'phone'     => $request->phone,
+                'role'      => 'client',
+                'is_active' => false,
+                'password'  => Hash::make(Str::random(32)),
             ]);
             Client::create([
                 'user_id'    => $user->id,
@@ -114,7 +114,9 @@ class SellerWebController extends Controller
 
     public function allocations(): View
     {
-        $allocations = $this->seller()->allocations()
+        $seller = $this->seller();
+
+        $allocations = $seller->allocations()
             ->with('weeklyStock.supplier.user')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -122,45 +124,79 @@ class SellerWebController extends Controller
         return view('seller.allocations', compact('allocations'));
     }
 
-    // ─── Passer une commande au fournisseur ──────────────────────────────────
+    // ─── Commandes : vendeur crée pour ses clients ────────────────────────────
 
-    public function placeOrder(Request $request): RedirectResponse
+    public function orders(): View
+    {
+        $seller = $this->seller();
+
+        $orders = Order::where('seller_id', $seller->id)
+            ->with(['buyer', 'payment'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $clients = $seller->clients()->with('user')->get();
+
+        $allocations = $seller->allocations()
+            ->with('weeklyStock')
+            ->where('remaining_qty', '>', 0)
+            ->get();
+
+        return view('seller.orders', compact('orders', 'clients', 'allocations'));
+    }
+
+    public function createOrderForClient(Request $request): RedirectResponse
     {
         $request->validate([
+            'client_id'     => 'required|integer|exists:clients,id',
             'allocation_id' => 'required|integer|exists:seller_allocations,id',
             'quantity'      => 'required|integer|min:1',
         ]);
 
         $seller     = $this->seller();
+        $client     = $seller->clients()->findOrFail($request->client_id);
         $allocation = $seller->allocations()->with('weeklyStock')->findOrFail($request->allocation_id);
 
         if ($allocation->remaining_qty < $request->quantity) {
             return back()->withErrors(['quantity' => 'Quantité supérieure au stock restant (' . $allocation->remaining_qty . ').']);
         }
 
-        DB::transaction(function () use ($request, $seller, $allocation) {
+        DB::transaction(function () use ($request, $seller, $client, $allocation) {
             $allocation->decrement('remaining_qty', $request->quantity);
 
             $order = Order::create([
                 'order_number' => 'ORD-' . strtoupper(Str::random(8)),
-                'buyer_id'     => $seller->user_id,
-                'supplier_id'  => $seller->supplier_id,
+                'buyer_id'     => $client->user_id,
+                'seller_id'    => $seller->id,
                 'week_start'   => $allocation->weeklyStock->week_start,
                 'quantity'     => $request->quantity,
-                'unit_price'   => $allocation->weeklyStock->unit_price,
+                'unit_price'   => $client->unit_price,
                 'status'       => Order::STATUS_CONFIRMED,
             ]);
 
             Payment::create([
                 'order_id' => $order->id,
-                'payer_id' => $seller->user_id,
+                'payer_id' => $client->user_id,
                 'amount'   => $order->total_amount,
                 'status'   => Payment::STATUS_PENDING,
-                'due_date' => now()->addDays(30),
+                'due_date' => now()->addDays(7),
             ]);
         });
 
-        return redirect()->route('seller.allocations')->with('success', 'Commande passée avec succès.');
+        return redirect()->route('seller.orders')->with('success', 'Commande créée pour le client.');
+    }
+
+    public function updateOrderStatus(Request $request, int $orderId): RedirectResponse
+    {
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,delivered,cancelled',
+        ]);
+
+        $seller = $this->seller();
+        $order  = Order::where('seller_id', $seller->id)->findOrFail($orderId);
+        $order->update(['status' => $request->status]);
+
+        return redirect()->route('seller.orders')->with('success', 'Statut mis à jour.');
     }
 
     // ─── Paiements ───────────────────────────────────────────────────────────

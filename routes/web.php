@@ -1,13 +1,21 @@
 <?php
 
-use App\Http\Controllers\Web\ClientWebController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\SellerWebController;
 use App\Http\Controllers\Web\SupplierWebController;
 use Illuminate\Support\Facades\Route;
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
-Route::get('/', fn() => redirect()->route('login'));
+Route::get('/', function () {
+    if (auth()->check()) {
+        return match (auth()->user()->role) {
+            'supplier' => redirect()->route('supplier.dashboard'),
+            'seller'   => redirect()->route('seller.dashboard'),
+            default    => redirect()->route('login'),
+        };
+    }
+    return redirect()->route('login');
+});
 
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [LoginController::class, 'login'])->middleware('guest');
@@ -40,15 +48,13 @@ Route::middleware(['auth', 'ensure.role:seller'])->prefix('seller')->name('selle
     Route::delete('/clients/{clientId}', [SellerWebController::class, 'deleteClient'])->name('clients.delete');
 
     Route::get('/allocations', [SellerWebController::class, 'allocations'])->name('allocations');
-    Route::post('/orders', [SellerWebController::class, 'placeOrder'])->name('orders.place');
+
+    // Commandes pour les clients
+    Route::get('/orders', [SellerWebController::class, 'orders'])->name('orders');
+    Route::post('/orders', [SellerWebController::class, 'createOrderForClient'])->name('orders.create');
+    Route::put('/orders/{orderId}/status', [SellerWebController::class, 'updateOrderStatus'])->name('orders.status');
 
     Route::get('/payments', [SellerWebController::class, 'payments'])->name('payments');
     Route::put('/payments/{paymentId}', [SellerWebController::class, 'updatePayment'])->name('payments.update');
 });
 
-// ── Client ────────────────────────────────────────────────────────────────────
-Route::middleware(['auth', 'ensure.role:client'])->prefix('client')->name('client.')->group(function () {
-    Route::get('/dashboard', [ClientWebController::class, 'dashboard'])->name('dashboard');
-    Route::get('/orders', [ClientWebController::class, 'orders'])->name('orders');
-    Route::post('/orders', [ClientWebController::class, 'placeOrder'])->name('orders.place');
-});

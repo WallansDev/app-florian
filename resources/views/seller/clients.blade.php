@@ -88,14 +88,6 @@
                         <label class="block text-sm font-medium text-slate-700 mb-1">Téléphone</label>
                         <input type="text" name="phone" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Mot de passe</label>
-                        <input type="password" name="password" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Confirmation</label>
-                        <input type="password" name="password_confirmation" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                    </div>
                     <div class="col-span-2">
                         <label class="block text-sm font-medium text-slate-700 mb-1">Prix de vente unitaire (€)</label>
                         <input type="number" name="unit_price" step="0.01" min="0" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -133,10 +125,6 @@
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Prix unitaire (€)</label>
                             <input type="number" name="unit_price" step="0.01" min="0" :value="editClient.unit_price" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                        </div>
-                        <div class="col-span-2 flex items-center gap-2">
-                            <input type="checkbox" id="is_active_c" name="is_active" :checked="editClient.user?.is_active" class="w-4 h-4 rounded border-slate-300 text-indigo-600">
-                            <label for="is_active_c" class="text-sm text-slate-700">Compte actif</label>
                         </div>
                     </div>
                     <div class="flex gap-3">

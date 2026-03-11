@@ -38,7 +38,6 @@ class LoginController extends Controller
         return match ($user->role) {
             'supplier' => redirect()->route('supplier.dashboard'),
             'seller'   => redirect()->route('seller.dashboard'),
-            'client'   => redirect()->route('client.dashboard'),
             default    => redirect('/'),
         };
     }

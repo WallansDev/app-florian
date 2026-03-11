@@ -33,11 +33,9 @@
     <div class="px-6 py-3 border-b border-slate-700">
         <span class="text-xs font-medium px-2 py-1 rounded-full
             @if(auth()->user()->isSupplier()) bg-violet-500/20 text-violet-300
-            @elseif(auth()->user()->isSeller()) bg-emerald-500/20 text-emerald-300
-            @else bg-sky-500/20 text-sky-300 @endif">
+            @else bg-emerald-500/20 text-emerald-300 @endif">
             @if(auth()->user()->isSupplier()) Fournisseur
-            @elseif(auth()->user()->isSeller()) Vendeur
-            @else Client @endif
+            @else Vendeur @endif
         </span>
         <p class="text-sm font-medium mt-2 truncate">{{ auth()->user()->name }}</p>
         <p class="text-xs text-slate-400 truncate">{{ auth()->user()->email }}</p>
@@ -90,25 +88,17 @@
                 </x-slot:icon>
                 Mon Stock
             </x-nav-link>
+            <x-nav-link :href="route('seller.orders')" :active="request()->routeIs('seller.orders')">
+                <x-slot:icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
+                </x-slot:icon>
+                Commandes Clients
+            </x-nav-link>
             <x-nav-link :href="route('seller.payments')" :active="request()->routeIs('seller.payments')">
                 <x-slot:icon>
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" /></svg>
                 </x-slot:icon>
                 Paiements
-            </x-nav-link>
-
-        @else
-            <x-nav-link :href="route('client.dashboard')" :active="request()->routeIs('client.dashboard')">
-                <x-slot:icon>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" /></svg>
-                </x-slot:icon>
-                Tableau de bord
-            </x-nav-link>
-            <x-nav-link :href="route('client.orders')" :active="request()->routeIs('client.orders')">
-                <x-slot:icon>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
-                </x-slot:icon>
-                Mes Commandes
             </x-nav-link>
         @endif
     </nav>
