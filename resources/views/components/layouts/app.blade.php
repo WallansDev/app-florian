@@ -7,7 +7,19 @@
     <title>{{ $title ?? config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Instrument Sans', 'ui-sans-serif', 'system-ui'] }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        [x-cloak] { display: none !important; }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800" x-data="{ sidebarOpen: false }">
